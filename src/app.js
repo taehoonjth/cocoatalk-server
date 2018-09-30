@@ -11,6 +11,9 @@ const server = http.createServer(app);
 
 const socketIo = io(server);
 
+// 메시지를 저장할 데이터
+let db = []; 
+
 // Allow CORS
 app.use(cors());
 
@@ -18,6 +21,13 @@ app.use(cors());
 app.get('/', (req, res) => {
   res.sendFile(path.resolve('public/index.html'));
 });
+
+// 기존의 대화를 모두 불러오는 라우트
+
+app.get('/messages', (req, res) => {
+  res.send(db);
+});
+
 
 // Start listening
 server.listen(process.env.PORT || config.port);
@@ -31,6 +41,9 @@ socketIo.on('connection', socket => {
   socket.on('client:message', data => {
     console.log(`${data.username}: ${data.message}`);
 
+    //들어온 메시지를 데이터에 푸쉬
+    db.push(data)
+    console.log(db);
     // message received from client, now broadcast it to everyone else
     socket.broadcast.emit('server:message', data);
   });
